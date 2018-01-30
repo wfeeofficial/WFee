@@ -1,3 +1,4 @@
+
 pragma solidity ^0.4.16;
 
 /**
@@ -17,7 +18,7 @@ contract BaseSafeMath {
 
 
 
-    function add(uint256 a, uint256 b) constant internal
+    function add(uint256 a, uint256 b) internal pure
 
     returns (uint256) {
 
@@ -30,7 +31,7 @@ contract BaseSafeMath {
     }
 
 
-    function sub(uint256 a, uint256 b) constant internal
+    function sub(uint256 a, uint256 b) internal pure
 
     returns (uint256) {
 
@@ -41,7 +42,7 @@ contract BaseSafeMath {
     }
 
 
-    function mul(uint256 a, uint256 b) constant internal
+    function mul(uint256 a, uint256 b) internal pure
 
     returns (uint256) {
 
@@ -54,7 +55,7 @@ contract BaseSafeMath {
     }
 
 
-    function div(uint256 a, uint256 b) constant internal
+    function div(uint256 a, uint256 b) internal pure
 
     returns (uint256) {
 
@@ -65,7 +66,7 @@ contract BaseSafeMath {
     }
 
 
-    function min(uint256 x, uint256 y) constant internal
+    function min(uint256 x, uint256 y) internal pure
 
     returns (uint256 z) {
 
@@ -74,7 +75,7 @@ contract BaseSafeMath {
     }
 
 
-    function max(uint256 x, uint256 y) constant internal
+    function max(uint256 x, uint256 y) internal pure
 
     returns (uint256 z) {
 
@@ -92,7 +93,7 @@ contract BaseSafeMath {
 
 
 
-    function madd(uint128 a, uint128 b) constant internal
+    function madd(uint128 a, uint128 b) internal pure
 
     returns (uint128) {
 
@@ -105,7 +106,7 @@ contract BaseSafeMath {
     }
 
 
-    function msub(uint128 a, uint128 b) constant internal
+    function msub(uint128 a, uint128 b) internal pure
 
     returns (uint128) {
 
@@ -116,7 +117,7 @@ contract BaseSafeMath {
     }
 
 
-    function mmul(uint128 a, uint128 b) constant internal
+    function mmul(uint128 a, uint128 b) internal pure
 
     returns (uint128) {
 
@@ -129,7 +130,7 @@ contract BaseSafeMath {
     }
 
 
-    function mdiv(uint128 a, uint128 b) constant internal
+    function mdiv(uint128 a, uint128 b) internal pure
 
     returns (uint128) {
 
@@ -140,7 +141,7 @@ contract BaseSafeMath {
     }
 
 
-    function mmin(uint128 x, uint128 y) constant internal
+    function mmin(uint128 x, uint128 y) internal pure
 
     returns (uint128 z) {
 
@@ -149,7 +150,7 @@ contract BaseSafeMath {
     }
 
 
-    function mmax(uint128 x, uint128 y) constant internal
+    function mmax(uint128 x, uint128 y) internal pure
 
     returns (uint128 z) {
 
@@ -167,7 +168,7 @@ contract BaseSafeMath {
 
 
 
-    function miadd(uint64 a, uint64 b) constant internal
+    function miadd(uint64 a, uint64 b) internal pure
 
     returns (uint64) {
 
@@ -180,7 +181,7 @@ contract BaseSafeMath {
     }
 
 
-    function misub(uint64 a, uint64 b) constant internal
+    function misub(uint64 a, uint64 b) internal pure
 
     returns (uint64) {
 
@@ -191,7 +192,7 @@ contract BaseSafeMath {
     }
 
 
-    function mimul(uint64 a, uint64 b) constant internal
+    function mimul(uint64 a, uint64 b) internal pure
 
     returns (uint64) {
 
@@ -204,7 +205,7 @@ contract BaseSafeMath {
     }
 
 
-    function midiv(uint64 a, uint64 b) constant internal
+    function midiv(uint64 a, uint64 b) internal pure
 
     returns (uint64) {
 
@@ -215,7 +216,7 @@ contract BaseSafeMath {
     }
 
 
-    function mimin(uint64 x, uint64 y) constant internal
+    function mimin(uint64 x, uint64 y) internal pure
 
     returns (uint64 z) {
 
@@ -224,7 +225,7 @@ contract BaseSafeMath {
     }
 
 
-    function mimax(uint64 x, uint64 y) constant internal
+    function mimax(uint64 x, uint64 y) internal pure
 
     returns (uint64 z) {
 
@@ -347,29 +348,60 @@ contract BaseERC20 {
 interface tokenRecipient {function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;}
 
 
-contract WFee is BaseERC20, BaseSafeMath {
-    string public name = "WFee";
-    string public symbol = "WFEE";
-    uint8 public decimals = 18;
-    uint256 public totalSupply = 10000000000;
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+contract LockUtils {
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Burn(address indexed from, uint256 value);
+    function getLockWFee(address account, uint8 decimals, uint256 createTime, address developer) internal view returns (uint256) {
+        uint256 tempLockWFee = 0;
+        if (account == developer) {
+            if (now < (createTime + 10 minutes)) {
+                tempLockWFee = 1500000000 * 10 ** uint256(decimals);
+            } else if (now < (createTime + 20 minutes)) {
+                tempLockWFee = 1125000000 * 10 ** uint256(decimals);
+            } else if (now < (createTime + 30 minutes)) {
+                tempLockWFee = 750000000 * 10 ** uint256(decimals);
+            } else if (now < (createTime + 40 minutes)) {
+                tempLockWFee = 375000000 * 10 ** uint256(decimals);
+            }
+            //            if (now < createTime + 2 years) {
+            //                tempLockWFee = 1500000000 * 10 ** uint256(decimals);
+            //            } else if (now < createTime + 2 years + 6 * 30 days) {
+            //                tempLockWFee = 1125000000 * 10 ** uint256(decimals);
+            //            } else if (now < createTime + 3 years) {
+            //                tempLockWFee = 750000000 * 10 ** uint256(decimals);
+            //            } else if (now < createTime + 3 years + 6 * 30 days) {
+            //                tempLockWFee = 375000000 * 10 ** uint256(decimals);
+            //            }
+        }
+        return tempLockWFee;
+    }
+
+}
+
+contract WFee is BaseERC20, BaseSafeMath, LockUtils {
+
+    //The solidity created time
+    uint256 createTime;
+    address developer;
 
     function WFee() public {
-        totalSupply = totalSupply * 10 ** uint256(decimals);
+        name = "WFee";
+        symbol = "WFEE";
+        decimals = 18;
+        totalSupply = 10000000000 * 10 ** uint256(decimals);
         balanceOf[msg.sender] = totalSupply;
+        developer = msg.sender;
+        createTime = now;
     }
 
     function _transfer(address _from, address _to, uint _value) internal {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
-        require(balanceOf[_from] >= _value);
+        // All transfer will check the available unlocked balance
+        require((balanceOf[_from] - getLockWFee(_from, decimals, createTime, developer)) >= _value);
+        // require(balanceOf[_from] >= _value);
         // Check for overflows
-        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require((balanceOf[_to] + _value) > balanceOf[_to]);
         // Save this for an assertion in the future
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         // Subtract from the sender
@@ -434,4 +466,5 @@ contract WFee is BaseERC20, BaseSafeMath {
         Burn(_from, _value);
         return true;
     }
+
 }
